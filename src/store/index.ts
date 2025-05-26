@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import stepsReducer from './stepsSlice';
 import clausulasReducer from './clausulasSlice';
 import authReducer from './authSlice';
+import analysesReducer from './analysesSlice';
 
 export interface StepsState {
   currentStep: number;
@@ -27,6 +28,7 @@ export const store = configureStore({
     steps: stepsReducer,
     clausulas: clausulasReducer,
     auth: authReducer,
+    analyses: analysesReducer,
   },
 });
 
