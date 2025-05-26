@@ -12,6 +12,7 @@ import SummaryScreen from './components/SummaryScreen';
 import RegisterScreen from './components/RegisterScreen';
 import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
+import AnalysesHistoryScreen from './components/AnalysesHistoryScreen';
 
 const App = () => {
   const step = useSelector((state: RootState) => state.steps.step);
@@ -37,6 +38,7 @@ const App = () => {
         <Route path="/login" element={<LoginScreen />} />
         <Route path="/cancel" element={<CancelScreen />} />
         <Route path="/success" element={<SuccessScreen />} />
+        <Route path="/analises" element={<AnalysesHistoryScreen />} />
         <Route path="/" element={
           <div className="app-bg">
             {step === 1 && <HomeScreen />}
