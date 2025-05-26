@@ -7,6 +7,8 @@ import { addAnalysis } from '../store/analysesSlice';
 import jsPDF from 'jspdf';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 
 
@@ -212,6 +214,12 @@ const SummaryScreen = () => {
             const analyses = savedAnalyses ? JSON.parse(savedAnalyses) : [];
             analyses.unshift(analysis);
             localStorage.setItem('contractAnalyses', JSON.stringify(analyses));
+
+            // Save to Firestore
+            addDoc(collection(db, 'Análise de contratos'), analysis).catch((e) => {
+              // Se quiser, pode mostrar erro para o usuário
+              console.error('Erro ao salvar análise no Firestore:', e);
+            });
           }
         })
         .catch(() => dispatch(setErrorResumo('Erro ao resumir cláusulas.')));
