@@ -8,6 +8,7 @@ export default defineConfig({
     port: 5173,
     allowedHosts: [
       'backend-production-ce11b.up.railway.appp',
+      '.ngrok-free.app'
     ],
     proxy: {
       '/api': {
