@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { setAnalyses, setLoading, setError, ContractAnalysis } from '../store/analysesSlice';
 import { useNavigate } from 'react-router-dom';
+import { db, auth } from '../firebase';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
 const AnalysesHistoryScreen: React.FC = () => {
   const dispatch = useDispatch();
@@ -16,14 +18,19 @@ const AnalysesHistoryScreen: React.FC = () => {
       return;
     }
 
-    // Load analyses from localStorage
-    const loadAnalyses = () => {
+    const loadAnalyses = async () => {
       dispatch(setLoading(true));
       try {
-        const savedAnalyses = localStorage.getItem('contractAnalyses');
-        if (savedAnalyses) {
-          dispatch(setAnalyses(JSON.parse(savedAnalyses)));
-        }
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error('Usuário não autenticado');
+        const q = query(
+          collection(db, 'Análise de contratos'),
+          where('uid', '==', uid),
+          orderBy('date', 'desc')
+        );
+        const querySnapshot = await getDocs(q);
+        const userAnalyses: ContractAnalysis[] = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ContractAnalysis));
+        dispatch(setAnalyses(userAnalyses));
       } catch (err) {
         dispatch(setError('Erro ao carregar análises.'));
       } finally {
@@ -135,4 +142,5 @@ const AnalysesHistoryScreen: React.FC = () => {
     </div>
   );
 };
+
 export default AnalysesHistoryScreen; 
