@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetSteps, prevStep } from '../store/stepsSlice';
 import { RootState } from '../store';
 import { setResumo, setLoadingResumo, setErrorResumo } from '../store/clausulasSlice';
+import { addAnalysis } from '../store/analysesSlice';
 import jsPDF from 'jspdf';
 import { useNavigate } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 
 
 
@@ -43,6 +45,52 @@ const PaymentCard = ({ onPay }: { onPay: () => void }) => (
     </div>
   </div>
 );
+
+const ClausulaResumoCard = ({ titulo, resumo }: { titulo: string; resumo: string }) => {
+  const [open, setOpen] = useState(false);
+  
+  // Separate the title from the risk details
+  const riscoIndex = resumo.indexOf('- Risco:');
+  const resumoText = riscoIndex !== -1 ? resumo.slice(0, riscoIndex).trim() : '';
+  const detalhesText = riscoIndex !== -1 ? resumo.slice(riscoIndex).trim() : resumo.trim();
+
+  return (
+    <div className="risk-clause" style={{ marginBottom: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <span className="risk-title">{titulo}</span>
+        {detalhesText && (
+          <button 
+            onClick={() => setOpen((v) => !v)} 
+            style={{ 
+              color: '#6366f1', 
+              background: 'none', 
+              border: 'none', 
+              marginLeft: 8, 
+              cursor: 'pointer', 
+              fontWeight: 600 
+            }}
+          >
+            {open ? '▲ menos detalhes' : '▼ mais detalhes'}
+          </button>
+        )}
+      </div>
+      {resumoText && (
+        <div style={{ marginTop: 4 }}>{resumoText}</div>
+      )}
+      {open && detalhesText && (
+        <div style={{ 
+          marginTop: 8, 
+          background: '#fde68a', 
+          borderRadius: 8, 
+          padding: 10, 
+          color: '#92400e' 
+        }}>
+          {detalhesText}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const SummaryScreen = () => {
   const dispatch = useDispatch();
@@ -146,10 +194,29 @@ const SummaryScreen = () => {
             riscos: data.riscos || [],
             recomendacoes: data.recomendacoes || '',
           }));
+
+          // Save the analysis if user is authenticated
+          if (isAuthenticated) {
+            const analysis = {
+              id: uuidv4(),
+              date: new Date().toISOString(),
+              clausulas,
+              resumoSeguras: data.seguras || [],
+              resumoRiscos: data.riscos || [],
+              recomendacoes: data.recomendacoes || '',
+            };
+            dispatch(addAnalysis(analysis));
+
+            // Save to localStorage
+            const savedAnalyses = localStorage.getItem('contractAnalyses');
+            const analyses = savedAnalyses ? JSON.parse(savedAnalyses) : [];
+            analyses.unshift(analysis);
+            localStorage.setItem('contractAnalyses', JSON.stringify(analyses));
+          }
         })
         .catch(() => dispatch(setErrorResumo('Erro ao resumir cláusulas.')));
     }
-  }, [clausulas, resumoSeguras.length, resumoRiscos.length, loadingResumo, errorResumo, dispatch]);
+  }, [clausulas, resumoSeguras.length, resumoRiscos.length, loadingResumo, errorResumo, dispatch, isAuthenticated]);
 
   return (
     <div className="card">
@@ -172,11 +239,10 @@ const SummaryScreen = () => {
           <div>
             <strong>Cláusulas de risco</strong>
             {loadingResumo ? <p>Carregando...</p> :
-              (resumoRiscos.length > 0 ? resumoRiscos.map((c: {titulo: string, resumo: string}, i: number) => (
-                <div className="risk-clause" key={i}>
-                  <span className="risk-title">{c.titulo}</span> {c.resumo}
-                </div>
-              )) : <p>Nenhuma cláusula de risco encontrada.</p>)}
+              (resumoRiscos.length > 0 ?
+                resumoRiscos.map((c: {titulo: string, resumo: string}, i: number) => (
+                  <ClausulaResumoCard key={i} titulo={c.titulo} resumo={c.resumo} />
+                )) : <p>Nenhuma cláusula de risco encontrada.</p>)}
           </div>
         </div>
         {/* <div className="summary-section recommend">

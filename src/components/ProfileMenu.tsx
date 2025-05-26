@@ -26,7 +26,7 @@ const ProfileMenu: React.FC<{ user?: { email?: string } }> = () => {
   };
 
   const handleGoToAnalises = () => {
-    navigate('/'); // ou para a rota de análises, se houver
+    navigate('/analises');
     setOpen(false);
   };
 
