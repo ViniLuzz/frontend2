@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { auth } from '../firebase';
 
 
 
@@ -206,6 +207,7 @@ const SummaryScreen = () => {
               resumoSeguras: data.seguras || [],
               resumoRiscos: data.riscos || [],
               recomendacoes: data.recomendacoes || '',
+              uid: auth.currentUser?.uid || null,
             };
             dispatch(addAnalysis(analysis));
 
