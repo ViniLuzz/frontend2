@@ -46,34 +46,6 @@ const PaymentCard = ({ onPay }: { onPay: () => void }) => (
   </div>
 );
 
-// Tipos para as cláusulas
-interface ClausulaResumo {
-  titulo: string;
-  detalhes: string;
-  resumo?: string;
-}
-
-// Função para separar resumo e detalhes das cláusulas de risco
-function parseResumoRiscos(riscos: { titulo: string; resumo: string }[]): ClausulaResumo[] {
-  return riscos.map((c: { titulo: string; resumo: string }) => {
-    // Se houver '- Risco:', tudo após isso vai para detalhes
-    const riscoIndex = c.resumo.indexOf('- Risco:');
-    let resumo = '', detalhes = '';
-    if (riscoIndex !== -1) {
-      resumo = '';
-      detalhes = c.resumo.slice(riscoIndex).trim();
-    } else {
-      resumo = '';
-      detalhes = c.resumo.trim();
-    }
-    return {
-      titulo: c.titulo,
-      resumo,
-      detalhes,
-    };
-  });
-}
-
 const ClausulaResumoCard = ({ titulo, resumo }: { titulo: string; resumo: string }) => {
   const [open, setOpen] = useState(false);
   

@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { setAnalyses, setLoading, setError, ContractAnalysis } from '../store/analysesSlice';
 import { useNavigate } from 'react-router-dom';
-import { v4 as uuidv4 } from 'uuid';
 
 const AnalysesHistoryScreen: React.FC = () => {
   const dispatch = useDispatch();
