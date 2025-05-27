@@ -108,10 +108,11 @@ const SummaryScreen = () => {
     localStorage.setItem('pago', 'true');
   };
 
-  const clearPayment = () =>{
+ const clearPayment = () => {
     setPago(false);
     localStorage.removeItem('pago');
-  }
+    console.log('Pagamento limpo:', localStorage.getItem('pago'));
+  };
 
   const handleDownloadPDF = () => {
     if (!pago) {
