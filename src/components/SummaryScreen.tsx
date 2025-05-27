@@ -200,6 +200,11 @@ const SummaryScreen = () => {
 
           // Save the analysis if user is authenticated
           if (isAuthenticated) {
+            const uid = auth.currentUser?.uid;
+            if (!uid) {
+              alert('Erro: usuário não autenticado. Faça login novamente.');
+              return;
+            }
             const analysis = {
               id: uuidv4(),
               date: new Date().toISOString(),
@@ -207,19 +212,16 @@ const SummaryScreen = () => {
               resumoSeguras: data.seguras || [],
               resumoRiscos: data.riscos || [],
               recomendacoes: data.recomendacoes || '',
-              uid: auth.currentUser?.uid || null,
+              uid,
             };
             dispatch(addAnalysis(analysis));
-
             // Save to localStorage
             const savedAnalyses = localStorage.getItem('contractAnalyses');
             const analyses = savedAnalyses ? JSON.parse(savedAnalyses) : [];
             analyses.unshift(analysis);
             localStorage.setItem('contractAnalyses', JSON.stringify(analyses));
-
             // Save to Firestore
             addDoc(collection(db, 'Análise de contratos'), analysis).catch((e) => {
-              // Se quiser, pode mostrar erro para o usuário
               console.error('Erro ao salvar análise no Firestore:', e);
             });
           }
