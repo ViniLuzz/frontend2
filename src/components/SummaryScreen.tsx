@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { resetSteps, prevStep } from '../store/stepsSlice';
+import { prevStep } from '../store/stepsSlice';
 import { RootState } from '../store';
 import { setResumo, setLoadingResumo, setErrorResumo } from '../store/clausulasSlice';
 import { addAnalysis } from '../store/analysesSlice';
