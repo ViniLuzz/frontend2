@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { nextStep, prevStep } from '../store/stepsSlice';
 import { setClausulas, setLoading, setError } from '../store/clausulasSlice';
@@ -9,6 +9,10 @@ const UploadScreen = () => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    localStorage.removeItem('pago');
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
