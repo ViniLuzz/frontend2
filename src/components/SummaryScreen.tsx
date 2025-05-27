@@ -180,12 +180,9 @@ const SummaryScreen = () => {
     }
   };
 
-  const handleAnalyzeAnother = () => {
-    if (!isAuthenticated) {
-      setShowInviteModal(true);
-      return;
-    }
-    dispatch(resetSteps());
+   const handleAnalyzeAnother = () => {
+    clearPayment();
+    window.location.reload();
   };
 
   useEffect(() => {
