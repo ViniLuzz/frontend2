@@ -108,11 +108,16 @@ const SummaryScreen = () => {
     localStorage.setItem('pago', 'true');
   };
 
+  const clearPayment = () =>{
+    setPago(false);
+    localStorage.removeItem('pago');
+  }
+
   const handleDownloadPDF = () => {
     if (!pago) {
       return;
     }
-
+    clearPayment();
     // Gera e baixa o PDF
     const doc = new jsPDF();
     let y = 10;
