@@ -108,7 +108,7 @@ const SummaryScreen = () => {
     localStorage.setItem('pago', 'true');
   };
 
- const clearPayment = () => {
+  const clearPayment = () => {
     setPago(false);
     localStorage.removeItem('pago');
     console.log('Pagamento limpo:', localStorage.getItem('pago'));
@@ -118,7 +118,6 @@ const SummaryScreen = () => {
     if (!pago) {
       return;
     }
-    clearPayment();
     // Gera e baixa o PDF
     const doc = new jsPDF();
     let y = 10;
@@ -180,7 +179,7 @@ const SummaryScreen = () => {
     }
   };
 
-   const handleAnalyzeAnother = () => {
+  const handleAnalyzeAnother = () => {
     clearPayment();
     window.location.reload();
   };
@@ -265,7 +264,10 @@ const SummaryScreen = () => {
           <p>{recomendacoes || 'Considere consultar um advogado para revisar o contrato.'}</p>
         </div> */}
         {errorResumo && <div style={{ color: 'red', marginBottom: 8 }}>{errorResumo}</div>}
-        <button className="btn-primary" onClick={handleAnalyzeAnother}>
+        <button className="btn-primary" onClick={() => {
+          localStorage.removeItem('pago');
+          handleAnalyzeAnother();
+        }}>
           Analisar outro contrato
         </button>
         <button className="btn-primary" style={{ marginTop: 8, background: '#6366f1' }} onClick={handleDownloadPDF}>

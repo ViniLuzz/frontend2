@@ -1,19 +1,19 @@
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { goToStep } from '../store/stepsSlice';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const SuccessScreen = () => {
   const dispatch = useDispatch();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem('pago', 'true');
   }, []);
 
   const handleViewAnalysis = () => {
-    dispatch(goToStep(3)); // Vai para ClauseExplanationScreen
-    // navigate('/'); // Não precisa mais navegar
+    dispatch(goToStep(3));
+    navigate('/');
   };
 
   return (
