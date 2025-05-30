@@ -16,6 +16,7 @@ import { loginSuccess } from './store/authSlice';
 import { auth } from './firebase';
 import PaymentStep from './components/PaymentStep';
 
+
 const App = () => {
   const step = useSelector((state: RootState) => state.steps.step);
   const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);

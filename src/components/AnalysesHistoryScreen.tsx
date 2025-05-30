@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { setAnalyses, setLoading, setError, ContractAnalysis } from '../store/analysesSlice';
 import { useNavigate } from 'react-router-dom';
-import { db, auth } from '../firebase';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 
 const AnalysesHistoryScreen: React.FC = () => {
   const dispatch = useDispatch();
@@ -21,16 +19,10 @@ const AnalysesHistoryScreen: React.FC = () => {
     const loadAnalyses = async () => {
       dispatch(setLoading(true));
       try {
-        const uid = auth.currentUser?.uid;
-        if (!uid) throw new Error('Usuário não autenticado');
-        const q = query(
-          collection(db, 'análises de contratos'),
-          where('uid', '==', uid),
-          orderBy('date', 'desc')
-        );
-        const querySnapshot = await getDocs(q);
-        const userAnalyses: ContractAnalysis[] = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as ContractAnalysis));
-        dispatch(setAnalyses(userAnalyses));
+        const savedAnalyses = localStorage.getItem('contractAnalyses');
+        if (savedAnalyses) {
+          dispatch(setAnalyses(JSON.parse(savedAnalyses)));
+        }
       } catch (err) {
         dispatch(setError('Erro ao carregar análises.'));
       } finally {
@@ -53,8 +45,9 @@ const AnalysesHistoryScreen: React.FC = () => {
   };
 
   const handleViewAnalysis = (analysis: ContractAnalysis) => {
-    // Redireciona para a tela de cláusulas explicadas com o token
-    navigate(`/clausulas?token=${analysis.id}`);
+    // Store the selected analysis in localStorage for viewing
+    localStorage.setItem('currentAnalysis', JSON.stringify(analysis));
+    navigate('/');
   };
 
   if (loading) {
@@ -97,30 +90,43 @@ const AnalysesHistoryScreen: React.FC = () => {
               key={analysis.id}
               style={{
                 background: '#f8fafc',
-                borderRadius: '16px',
-                padding: '20px 24px',
-                border: '2px solid #22c55e',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                boxShadow: '0 2px 8px #e0e7ff',
+                borderRadius: '12px',
+                padding: '16px',
+                border: '1px solid #e2e8f0',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
               }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+              }}
+              onClick={() => handleViewAnalysis(analysis)}
             >
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 18, color: '#1e293b', marginBottom: 4 }}>
-                  {'Análise de contrato'}
-                </div>
-                <div style={{ fontWeight: 600, fontSize: 16, color: '#16a34a' }}>
-                  DATA: {formatDate(analysis.date)}
-                </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', color: '#1e293b' }}>
+                  Análise de {formatDate(analysis.date)}
+                </h3>
+                <span style={{ color: '#64748b', fontSize: '14px' }}>
+                  {analysis.resumoRiscos.length} riscos encontrados
+                </span>
               </div>
-              <button
-                className="btn-primary"
-                style={{ fontWeight: 700, fontSize: 16, background: '#a78bfa', color: '#fff', marginLeft: 16, minWidth: 120 }}
-                onClick={() => handleViewAnalysis(analysis)}
-              >
-                VER ANÁLISE
-              </button>
+              <div style={{ color: '#64748b', fontSize: '14px' }}>
+                {analysis.resumoRiscos.slice(0, 2).map((risco, index: number) => (
+                  <div key={index} style={{ marginBottom: '4px' }}>
+                    • {risco.titulo}
+                  </div>
+                ))}
+                {analysis.resumoRiscos.length > 2 && (
+                  <div style={{ color: '#6366f1', marginTop: '4px' }}>
+                    +{analysis.resumoRiscos.length - 2} mais riscos...
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

@@ -114,6 +114,7 @@ const SummaryScreen = () => {
   }
   const params = new URLSearchParams(location.search);
   const token = params.get('token');
+
   return (
     <div className="card">
       <button className="btn-back" onClick={() => token && navigate(`/clausulas?token=${token}`)}>&larr; Voltar</button>
@@ -144,6 +145,7 @@ const SummaryScreen = () => {
       <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/upload')}>
         Analisar outro contrato
       </button>
+
     </div>
   );
 };
