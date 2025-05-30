@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { nextStep, prevStep } from '../store/stepsSlice';
+import { prevStep } from '../store/stepsSlice';
 import { setClausulas, setLoading, setError } from '../store/clausulasSlice';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
 const UploadScreen = () => {
   const dispatch = useDispatch();
@@ -9,6 +11,7 @@ const UploadScreen = () => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -46,6 +49,17 @@ const UploadScreen = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      // Extrai o token da URL
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      if (token) {
+        formData.append('token', token);
+      }
+      // Adiciona o uid do usuário logado
+      const uid = auth.currentUser?.uid;
+      if (uid) {
+        formData.append('uid', uid);
+      }
       
       console.log('Iniciando upload do arquivo:', file.name);
       
@@ -67,9 +81,9 @@ const UploadScreen = () => {
       const data = await response.json();
       console.log('Dados recebidos:', data);
 
-      if (data.clausulas) {
+      if (data.clausulas && data.token) {
         dispatch(setClausulas(data.clausulas));
-        dispatch(nextStep());
+        navigate(`/pagamento?token=${data.token}`);
       } else {
         throw new Error(data.error || 'Resposta inválida do servidor');
       }
