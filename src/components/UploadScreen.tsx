@@ -63,7 +63,7 @@ const UploadScreen = () => {
       
       console.log('Iniciando upload do arquivo:', file.name);
       
-      const response = await fetch('https://backend-production-ce11b.up.railway.app/api/analisar-contrato', {
+      const response = await fetch('http://backend3.railway.internal/api/analisar-contrato', {
         method: 'POST',
         body: formData,
         headers: {

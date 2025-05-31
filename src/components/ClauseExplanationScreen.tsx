@@ -71,7 +71,7 @@ const ClauseExplanationScreen = () => {
     const token = params.get('token');
     // Removido: redirecionamento automático para o resumo final
     if (!clausulas && token) {
-      fetch(`https://backend-production-ce11b.up.railway.app/api/analise-por-token?token=${token}`)
+      fetch(`http://backend3.railway.internal/api/analise-por-token?token=${token}`)
         .then(res => {
           if (res.status === 403) {
             throw new Error('O pagamento ainda não foi confirmado. Tente novamente em instantes.');
