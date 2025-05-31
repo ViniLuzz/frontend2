@@ -7,12 +7,12 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'backend-production-ce11b.up.railway.appp',
+      'backend3.railway.internal',
       '.ngrok-free.app'
     ],
     proxy: {
       '/api': {
-        target: 'backend-production-ce11b.up.railway.app',
+        target: 'http://backend3.railway.internal',
         changeOrigin: true,
         secure: false,
         ws: true
