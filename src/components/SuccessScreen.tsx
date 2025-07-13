@@ -12,7 +12,7 @@ const SuccessScreen = () => {
       setStatus('erro');
       return;
     }
-    fetch(`https://backend3-production-0b95.up.railway.app/api/analise-liberada?token=${token}`)
+          fetch(`https://backend-zi8r.onrender.com/api/analise-liberada?token=${token}`)
       .then(res => res.json())
       .then(data => {
         if (data.liberado) {

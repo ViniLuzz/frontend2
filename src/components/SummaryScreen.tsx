@@ -40,7 +40,7 @@ const SummaryScreen = () => {
       setLoading(false);
       return;
     }
-    fetch(`https://backend3-production-0b95.up.railway.app/api/analise-por-token?token=${token}`)
+            fetch(`https://backend-zi8r.onrender.com/api/analise-por-token?token=${token}`)
       .then(res => {
         if (res.status === 403) {
           throw new Error('O pagamento ainda não foi confirmado. Tente novamente em instantes.');

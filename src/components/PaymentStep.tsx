@@ -15,7 +15,7 @@ const PaymentStep = () => {
         setLoadingStripe(false);
         return;
       }
-      const res = await fetch('https://backend3-production-0b95.up.railway.app/api/create-checkout-session', {
+      const res = await fetch('https://backend-zi8r.onrender.com/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
