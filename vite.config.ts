@@ -7,12 +7,12 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: [
-      'backend3-production-0b95.up.railway.app',
+      'backend-zi8r.onrender.com',
       '.ngrok-free.app'
     ],
     proxy: {
       '/api': {
-        target: 'https://backend3-production-0b95.up.railway.app',
+        target: 'https://backend-zi8r.onrender.com',
         changeOrigin: true,
         secure: true,
         ws: true
