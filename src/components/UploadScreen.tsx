@@ -60,9 +60,9 @@ const UploadScreen = () => {
       if (uid) {
         formData.append('uid', uid);
       }
-      
+
       console.log('Iniciando upload do arquivo:', file.name);
-      
+
       const response = await fetch('https://backend-zi8r.onrender.com/api/analisar-contrato', {
         method: 'POST',
         body: formData,
@@ -72,13 +72,19 @@ const UploadScreen = () => {
       });
 
       console.log('Resposta recebida:', response.status);
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `Erro no servidor: ${response.status}`);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch {
+        const text = await response.text();
+        throw new Error(text || 'Resposta inválida do servidor');
+      }
       console.log('Dados recebidos:', data);
 
       if (data.clausulas && data.token) {
