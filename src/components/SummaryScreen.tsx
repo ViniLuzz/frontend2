@@ -1,25 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
+import { API_URLS } from '../config/api';
 
-const ClausulaResumoCard = ({ titulo, resumo }: { titulo: string; resumo: string }) => {
-  const [open, setOpen] = useState(false);
-  const riscoIndex = resumo.indexOf('- Risco:');
-  const resumoText = riscoIndex !== -1 ? resumo.slice(0, riscoIndex).trim() : '';
-  const detalhesText = riscoIndex !== -1 ? resumo.slice(riscoIndex).trim() : resumo.trim();
+const ClausulaResumoCard = ({ titulo, resumo, detalhes }: { titulo: string; resumo: string; detalhes?: string }) => {
+  const [showDetails, setShowDetails] = useState(false);
+  const detalhesText = detalhes || resumo;
+
   return (
-    <div className="risk-clause" style={{ marginBottom: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <span className="risk-title">{titulo}</span>
-        {detalhesText && (
-          <button onClick={() => setOpen((v) => !v)} style={{ color: '#6366f1', background: 'none', border: 'none', marginLeft: 8, cursor: 'pointer', fontWeight: 600 }}>
-            {open ? '▲ menos detalhes' : '▼ mais detalhes'}
-          </button>
-        )}
-      </div>
-      {resumoText && <div style={{ marginTop: 4 }}>{resumoText}</div>}
-      {open && detalhesText && (
-        <div style={{ marginTop: 8, background: '#fde68a', borderRadius: 8, padding: 10, color: '#92400e' }}>{detalhesText}</div>
+    <div className="clausula-card" style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: '#fef3c7', border: '1px solid #f59e0b' }}>
+      <div style={{ fontWeight: 600, marginBottom: 4, color: '#92400e' }}>{titulo}</div>
+      <div style={{ fontSize: 14, color: '#92400e' }}>{resumo}</div>
+      {detalhes && (
+        <button 
+          onClick={() => setShowDetails(!showDetails)}
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            color: '#92400e', 
+            textDecoration: 'underline', 
+            cursor: 'pointer',
+            fontSize: 12,
+            marginTop: 4
+          }}
+        >
+          {showDetails ? 'Ver menos' : 'Ver mais'}
+        </button>
+      )}
+      {showDetails && detalhes && (
+        <div style={{ marginTop: 8, fontSize: 13, color: '#92400e' }}>{detalhesText}</div>
       )}
     </div>
   );
@@ -40,7 +48,8 @@ const SummaryScreen = () => {
       setLoading(false);
       return;
     }
-            fetch(`https://backend-zi8r.onrender.com/api/analise-por-token?token=${token}`)
+    
+    fetch(`${API_URLS.ANALISE_POR_TOKEN}?token=${token}`)
       .then(res => {
         if (res.status === 403) {
           throw new Error('O pagamento ainda não foi confirmado. Tente novamente em instantes.');
@@ -60,58 +69,40 @@ const SummaryScreen = () => {
 
   const handleDownloadPDF = () => {
     if (!analise) return;
-    const doc = new jsPDF();
-    let y = 10;
-    doc.setFontSize(16);
-    doc.text('Análise Contratual', 10, y);
-    y += 8;
-    doc.setFontSize(14);
-    doc.text('Cláusulas de Atenção', 10, y);
-    y += 8;
-    doc.setFontSize(11);
-    (analise.clausulas || '').split(/\n(?=\d+\.)/).forEach((cl: string) => {
-      if (y > 270) { doc.addPage(); y = 10; }
-      doc.text(cl.trim(), 10, y, { maxWidth: 190 });
-      y += 8 + Math.floor(cl.length / 90) * 6;
-    });
-    y += 10;
-    doc.setFontSize(14);
-    doc.text('Cláusulas Seguras', 10, y);
-    y += 8;
-    doc.setFontSize(11);
-    (analise.resumoSeguras || []).forEach((c: {titulo: string, resumo: string}) => {
-      if (y > 270) { doc.addPage(); y = 10; }
-      doc.text(`${c.titulo}: ${c.resumo}`, 12, y, { maxWidth: 185 });
-      y += 7 + Math.floor((c.titulo.length + c.resumo.length) / 90) * 6;
-    });
-    y += 7;
-    doc.setFontSize(14);
-    doc.text('Cláusulas de Risco', 10, y);
-    y += 8;
-    doc.setFontSize(11);
-    (analise.resumoRiscos || []).forEach((c: {titulo: string, resumo: string}) => {
-      if (y > 270) { doc.addPage(); y = 10; }
-      doc.text(`${c.titulo}: ${c.resumo}`, 12, y, { maxWidth: 185 });
-      y += 7 + Math.floor((c.titulo.length + c.resumo.length) / 90) * 6;
-    });
-    y += 7;
-    doc.setFontSize(14);
-    doc.text('Recomendações', 10, y);
-    y += 8;
-    doc.setFontSize(11);
-    doc.text(analise.recomendacoes || 'Considere consultar um advogado para revisar o contrato.', 12, y, { maxWidth: 185 });
-    doc.save('analise-contrato.pdf');
+    
+    // Aqui você pode implementar o download do PDF
+    // Por enquanto, vamos apenas mostrar uma mensagem
+    alert('Funcionalidade de download em desenvolvimento');
   };
 
   if (loading) {
-    return <div className="card"><h2 className="title">Resumo final</h2><p>Carregando análise...</p></div>;
+    return (
+      <div className="card">
+        <h2 className="title">Resumo final</h2>
+        <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <div className="loading-spinner"></div>
+          <p>Carregando análise...</p>
+        </div>
+      </div>
+    );
   }
+
   if (erro) {
-    return <div className="card"><h2 className="title">Resumo final</h2><p style={{ color: 'red' }}>{erro}</p></div>;
+    return (
+      <div className="card">
+        <h2 className="title">Erro</h2>
+        <p style={{ color: '#ef4444' }}>{erro}</p>
+        <button className="btn-primary" onClick={() => navigate('/upload')}>
+          Voltar ao Início
+        </button>
+      </div>
+    );
   }
+
   if (!analise) {
     return <div className="card"><h2 className="title">Resumo final</h2><p>Nenhuma análise encontrada.</p></div>;
   }
+  
   const params = new URLSearchParams(location.search);
   const token = params.get('token');
 
@@ -145,7 +136,6 @@ const SummaryScreen = () => {
       <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/upload')}>
         Analisar outro contrato
       </button>
-
     </div>
   );
 };

@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {prevStep} from '../store/stepsSlice';
-import { RootState } from '../store';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { RootState } from '../store';
+import { setClausulas, setLoading, setError } from '../store/clausulasSlice';
+import { prevStep } from '../store/stepsSlice';
+import { API_URLS } from '../config/api';
 
 // Função para remover asteriscos duplicados
 function cleanText(text: string) {
@@ -38,21 +40,86 @@ function parseClausulas(text: string) {
   });
 }
 
-const ClausulaCard = ({ titulo, resumo, detalhes }: { titulo: string, resumo: string, detalhes: string }) => {
-  const [open, setOpen] = useState(false);
+const ClausulaCard = ({ titulo, resumo, detalhes, risco }: { titulo: string; resumo: string; detalhes?: string; risco?: string }) => {
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
-    <div className="clausula-card" style={{ background: '#f5f3ff', borderRadius: 12, marginBottom: 16, boxShadow: '0 2px 8px #e0e7ff', padding: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }} onClick={() => setOpen(!open)}>
-        <div>
-          <strong>{titulo}</strong>
-          {resumo && <div style={{ marginTop: 4 }}>{resumo}</div>}
-        </div>
-        <button style={{ background: 'none', border: 'none', color: '#6366f1', fontWeight: 600, cursor: 'pointer' }}>
-          {open ? '▲ menos detalhes' : '▼ mais detalhes'}
-        </button>
+    <div className="clausula-card" style={{ 
+      marginBottom: 16, 
+      padding: 16, 
+      borderRadius: 12, 
+      background: '#fef3c7', 
+      border: '1px solid #f59e0b',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+    }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'flex-start',
+        marginBottom: 8
+      }}>
+        <h3 style={{ 
+          margin: 0, 
+          fontSize: 16, 
+          fontWeight: 600, 
+          color: '#92400e' 
+        }}>
+          {titulo}
+        </h3>
+        {risco && (
+          <span style={{ 
+            background: '#ef4444', 
+            color: 'white', 
+            padding: '2px 8px', 
+            borderRadius: 12, 
+            fontSize: 11,
+            fontWeight: 500
+          }}>
+            {risco}
+          </span>
+        )}
       </div>
-      {open && detalhes && (
-        <div style={{ marginTop: 12, color: '#3730a3', background: '#ede9fe', borderRadius: 8, padding: 10, whiteSpace: 'pre-line' }}>{detalhes}</div>
+      
+      <p style={{ 
+        margin: '8px 0', 
+        fontSize: 14, 
+        color: '#92400e',
+        lineHeight: 1.4
+      }}>
+        {resumo}
+      </p>
+      
+      {detalhes && (
+        <>
+          <button 
+            onClick={() => setShowDetails(!showDetails)}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: '#92400e', 
+              textDecoration: 'underline', 
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 500
+            }}
+          >
+            {showDetails ? 'Ver menos detalhes' : 'Ver mais detalhes'}
+          </button>
+          
+          {showDetails && (
+            <div style={{ 
+              marginTop: 12, 
+              padding: 12, 
+              background: '#fde68a', 
+              borderRadius: 8, 
+              color: '#92400e',
+              fontSize: 13,
+              lineHeight: 1.5
+            }}>
+              {detalhes}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -71,7 +138,7 @@ const ClauseExplanationScreen = () => {
     const token = params.get('token');
     // Removido: redirecionamento automático para o resumo final
     if (!clausulas && token) {
-      fetch(`https://backend-zi8r.onrender.com/api/analise-por-token?token=${token}`)
+      fetch(`${API_URLS.ANALISE_POR_TOKEN}?token=${token}`)
         .then(res => {
           if (res.status === 403) {
             throw new Error('O pagamento ainda não foi confirmado. Tente novamente em instantes.');

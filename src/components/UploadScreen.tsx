@@ -1,41 +1,17 @@
-import React, { useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { prevStep } from '../store/stepsSlice';
-import { setClausulas, setLoading, setError } from '../store/clausulasSlice';
+import React, { useState, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { setClausulas, setLoading, setError } from '../store/clausulasSlice';
+import { RootState } from '../store';
 import { auth } from '../firebase';
+import { API_URLS } from '../config/api';
 
 const UploadScreen = () => {
   const dispatch = useDispatch();
   const [file, setFile] = useState<File | null>(null);
-  const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-  };
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-    }
-  };
 
   const handleBoxClick = () => {
     inputRef.current?.click();
@@ -63,7 +39,7 @@ const UploadScreen = () => {
 
       console.log('Iniciando upload do arquivo:', file.name);
 
-      const response = await fetch('https://backend-zi8r.onrender.com/api/analisar-contrato', {
+      const response = await fetch(API_URLS.ANALISAR_CONTRATO, {
         method: 'POST',
         body: formData,
         headers: {
@@ -102,45 +78,40 @@ const UploadScreen = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+
   return (
     <div className="card">
-      <button className="btn-back" onClick={() => dispatch(prevStep())}>&larr;</button>
-      <h2 className="title">Envie seu contrato</h2>
-      <div
-        className={`upload-box${dragActive ? ' upload-box-active' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleBoxClick}
-        style={{ cursor: 'pointer' }}
-      >
+      <button className="btn-back" onClick={() => window.history.back()}>&larr;</button>
+      <h2 className="title">Upload do Contrato</h2>
+      <p>Faça upload do seu contrato para análise</p>
+      
+      <div className="upload-box" onClick={handleBoxClick}>
         <input
-          type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
-          style={{ display: 'none' }}
           ref={inputRef}
+          type="file"
           onChange={handleFileChange}
+          accept=".pdf,.jpg,.jpeg,.png,.txt"
+          style={{ display: 'none' }}
         />
-        <div className="upload-icon">📄</div>
         {file ? (
-          <p style={{ fontWeight: 500 }}>{file.name}</p>
+          <div>
+            <p>Arquivo selecionado: {file.name}</p>
+            <button className="btn-primary" onClick={handleAnalyze} disabled={uploading}>
+              {uploading ? 'Analisando...' : 'Analisar Contrato'}
+            </button>
+          </div>
         ) : (
-          <>
-            <p>Carregue um arquivo PDF ou imagem do contrato</p>
-            <span className="upload-types">PDF, JPG, PNG</span>
-          </>
+          <div>
+            <p>Clique para selecionar um arquivo</p>
+            <p>Formatos aceitos: PDF, JPG, PNG, TXT</p>
+          </div>
         )}
-      </div>
-      <button
-        className="btn-primary"
-        onClick={handleAnalyze}
-        disabled={!file || uploading}
-        style={{ opacity: file && !uploading ? 1 : 0.5, cursor: file && !uploading ? 'pointer' : 'not-allowed' }}
-      >
-        {uploading ? 'Analisando...' : 'Fazer Leitura de Contrato'}
-      </button>
-      <div className="upload-footer">
-        {uploading ? 'Analisando contrato com IA...' : file ? 'Arquivo pronto para leitura.' : 'Estamos lendo o contrato...'}
       </div>
     </div>
   );

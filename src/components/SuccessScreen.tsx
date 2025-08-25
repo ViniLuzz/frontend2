@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_URLS } from '../config/api';
 
 const SuccessScreen = () => {
   const navigate = useNavigate();
@@ -12,7 +13,8 @@ const SuccessScreen = () => {
       setStatus('erro');
       return;
     }
-          fetch(`https://backend-zi8r.onrender.com/api/analise-liberada?token=${token}`)
+    
+    fetch(`${API_URLS.ANALISE_LIBERADA}?token=${token}`)
       .then(res => res.json())
       .then(data => {
         if (data.liberado) {
@@ -33,22 +35,48 @@ const SuccessScreen = () => {
   };
 
   return (
-    <div className="card" style={{ 
-      maxWidth: 400, 
-      margin: '0 auto', 
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    }}>
-      <h2 className="title">Pagamento aprovado!</h2>
-      {status === 'loading' && <p style={{ color: '#6366f1', fontWeight: 600, fontSize: 18, margin: '20px 0' }}>Verificando pagamento...</p>}
-      {status === 'liberado' && <>
-        <p style={{ color: '#22c55e', fontWeight: 600, fontSize: 18, margin: '20px 0' }}>Acesso liberado à análise contratual.</p>
-        <button onClick={handleViewAnalysis} className="btn-primary" style={{ display: 'inline-block', marginTop: 16 }}>Ver análise</button>
-      </>}
-      {status === 'negado' && <p style={{ color: '#ef4444', fontWeight: 600, fontSize: 18, margin: '20px 0' }}>Pagamento não confirmado ainda. Aguarde alguns segundos e recarregue.</p>}
-      {status === 'erro' && <p style={{ color: '#ef4444', fontWeight: 600, fontSize: 18, margin: '20px 0' }}>Erro ao verificar pagamento. Tente novamente.</p>}
+    <div className="card">
+      <h2 className="title">Status do Pagamento</h2>
+      
+      {status === 'loading' && (
+        <div className="status-loading">
+          <div className="loading-spinner"></div>
+          <p>Verificando status do pagamento...</p>
+        </div>
+      )}
+      
+      {status === 'liberado' && (
+        <div className="status-success">
+          <div className="success-icon">✅</div>
+          <h3>Pagamento Confirmado!</h3>
+          <p>Sua análise está liberada. Clique no botão abaixo para visualizar os resultados.</p>
+          <button className="btn-primary" onClick={handleViewAnalysis}>
+            Ver Análise Completa
+          </button>
+        </div>
+      )}
+      
+      {status === 'negado' && (
+        <div className="status-error">
+          <div className="error-icon">❌</div>
+          <h3>Pagamento Pendente</h3>
+          <p>O pagamento ainda não foi confirmado. Aguarde alguns instantes e tente novamente.</p>
+          <button className="btn-primary" onClick={() => window.location.reload()}>
+            Verificar Novamente
+          </button>
+        </div>
+      )}
+      
+      {status === 'erro' && (
+        <div className="status-error">
+          <div className="error-icon">⚠️</div>
+          <h3>Erro na Verificação</h3>
+          <p>Ocorreu um erro ao verificar o status. Tente novamente ou entre em contato com o suporte.</p>
+          <button className="btn-primary" onClick={() => navigate('/upload')}>
+            Voltar ao Início
+          </button>
+        </div>
+      )}
     </div>
   );
 };
