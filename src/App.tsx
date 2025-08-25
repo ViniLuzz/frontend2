@@ -34,12 +34,13 @@ const App = () => {
 
   return (
     <>
-      {isAuthenticated && user && <ProfileMenu user={user} />}
+      
       <Routes>
+      <Route path="/cancel" element={<div className="app-bg"><CancelScreen /></div>} />
+      <Route path="/success" element={<div className="app-bg"><SuccessScreen /></div>} />
+         {isAuthenticated && user && <ProfileMenu user={user} />}
         <Route path="/register" element={<div className="app-bg"><RegisterScreen /></div>} />
         <Route path="/login" element={<div className="app-bg"><LoginScreen /></div>} />
-        <Route path="/cancel" element={<div className="app-bg"><CancelScreen /></div>} />
-        <Route path="/success" element={<div className="app-bg"><SuccessScreen /></div>} />
         <Route path="/analises" element={<div className="app-bg"><AnalysesHistoryScreen /></div>} />
         <Route path="/upload" element={<div className="app-bg"><UploadScreen /></div>} />
         <Route path="/pagamento" element={<div className="app-bg"><PaymentStep /></div>} />
