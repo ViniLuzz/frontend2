@@ -17,66 +17,57 @@ const UploadScreen = () => {
     inputRef.current?.click();
   };
 
-  const handleAnalyze = async () => {
-    if (!file) return;
-    setUploading(true);
-    dispatch(setLoading(true));
-    dispatch(setError(null));
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      // Extrai o token da URL
-      const params = new URLSearchParams(window.location.search);
-      const token = params.get('token');
-      if (token) {
-        formData.append('token', token);
-      }
-      // Adiciona o uid do usuário logado
-      const uid = auth.currentUser?.uid;
-      if (uid) {
-        formData.append('uid', uid);
-      }
+ const handleAnalyze = async () => {
+  if (!file) return;
+  setUploading(true);
+  dispatch(setLoading(true));
+  dispatch(setError(null));
 
-      console.log('Iniciando upload do arquivo:', file.name);
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
 
-      const response = await fetch(API_URLS.ANALISAR_CONTRATO, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
+    // Token da URL
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) formData.append('token', token);
 
-      console.log('Resposta recebida:', response.status);
+    // UID do usuário logado
+    const uid = auth.currentUser?.uid;
+    if (uid) formData.append('uid', uid);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Erro no servidor: ${response.status}`);
-      }
+    console.log('📤 Iniciando upload do arquivo:', file.name);
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        const text = await response.text();
-        throw new Error(text || 'Resposta inválida do servidor');
-      }
-      console.log('Dados recebidos:', data);
+    const response = await fetch(API_URLS.ANALISAR_CONTRATO, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
 
-      if (data.clausulas && data.token) {
-        dispatch(setClausulas(data.clausulas));
-        navigate(`/pagamento?token=${data.token}`);
-      } else {
-        throw new Error(data.error || 'Resposta inválida do servidor');
-      }
-    } catch (err) {
-      console.error('Erro durante o upload:', err);
-      dispatch(setError(err instanceof Error ? err.message : 'Erro ao conectar com o servidor.'));
-    } finally {
-      setUploading(false);
-      dispatch(setLoading(false));
+    console.log('📥 Resposta recebida:', response.status);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Erro no servidor: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    console.log('📥 Dados recebidos do servidor:', data);
+
+    if (data.clausulas && data.token) {
+      dispatch(setClausulas(data.clausulas));
+      navigate(`/pagamento?token=${data.token}`);
+    } else {
+      throw new Error(data.error || 'Resposta inválida do servidor');
+    }
+  } catch (err) {
+    console.error('❌ Erro durante o upload:', err);
+    dispatch(setError(err instanceof Error ? err.message : 'Erro ao conectar com o servidor.'));
+  } finally {
+    setUploading(false);
+    dispatch(setLoading(false));
+  }
+};
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
